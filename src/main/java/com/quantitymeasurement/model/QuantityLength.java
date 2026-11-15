@@ -119,6 +119,102 @@ public final class QuantityLength {
         return new QuantityLength(convertedValue, targetUnit);
     }
 
+
+    /**
+     * Adds another length measurement to this measurement.
+     * The returned measurement uses this object's unit.
+     *
+     * @param other second length measurement
+     * @return a new QuantityLength in the unit of this measurement
+     * @throws IllegalArgumentException if the other measurement is null
+     * @throws ArithmeticException if the result is not finite
+     */
+    public QuantityLength add(QuantityLength other) {
+
+        if (other == null) {
+            throw new IllegalArgumentException(
+                    "Second measurement cannot be null"
+            );
+        }
+
+        return add(this, other);
+    }
+
+    /**
+     * Adds two length measurements.
+     * The result uses the unit of the first measurement.
+     *
+     * @param first first length measurement
+     * @param second second length measurement
+     * @return a new QuantityLength in the first measurement's unit
+     * @throws IllegalArgumentException if either measurement is null
+     * @throws ArithmeticException if the result is not finite
+     */
+    public static QuantityLength add(
+            QuantityLength first,
+            QuantityLength second
+    ) {
+
+        if (first == null || second == null) {
+            throw new IllegalArgumentException(
+                    "Length measurements cannot be null"
+            );
+        }
+
+        // Convert both measurements to the common base unit feet.
+        double firstInFeet = first.convertToBaseUnit();
+        double secondInFeet = second.convertToBaseUnit();
+
+        // Add both measurements in feet.
+        double sumInFeet = firstInFeet + secondInFeet;
+
+        if (!Double.isFinite(sumInFeet)) {
+            throw new ArithmeticException(
+                    "Addition result exceeds the finite double range"
+            );
+        }
+
+        // Convert the sum into the first measurement's unit.
+        double resultValue =
+                sumInFeet / first.unit.getConversionFactor();
+
+        if (!Double.isFinite(resultValue)) {
+            throw new ArithmeticException(
+                    "Addition result cannot be represented as a finite double"
+            );
+        }
+
+        // Return a new immutable measurement.
+        return new QuantityLength(resultValue, first.unit);
+    }
+
+    /**
+     * Adds two raw length values using their respective units.
+     * The result uses the unit of the first value.
+     *
+     * @param firstValue first measurement value
+     * @param firstUnit first measurement unit
+     * @param secondValue second measurement value
+     * @param secondUnit second measurement unit
+     * @return a new QuantityLength in the first unit
+     */
+    public static QuantityLength add(
+            double firstValue,
+            LengthUnit firstUnit,
+            double secondValue,
+            LengthUnit secondUnit
+    ) {
+
+        QuantityLength first =
+                new QuantityLength(firstValue, firstUnit);
+
+        QuantityLength second =
+                new QuantityLength(secondValue, secondUnit);
+
+        return add(first, second);
+    }
+
+
     /**
      * Compares two measurements after converting them to feet.
      *

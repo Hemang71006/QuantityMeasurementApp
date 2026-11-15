@@ -171,6 +171,26 @@ public class QuantityMeasurementApp {
         return demonstrateLengthEquality(first, second);
     }
 
+
+    /**
+     * Demonstrates addition of two length measurements.
+     * The result is expressed in the first measurement's unit.
+     */
+    public static QuantityLength demonstrateLengthAddition(
+            QuantityLength first,
+            QuantityLength second
+    ) {
+
+        QuantityLength result = QuantityLength.add(first, second);
+
+        System.out.println(
+                first + " + " + second + " = " + result
+        );
+
+        return result;
+    }
+
+
     // Application entry point.
     public static void main(String[] args) {
 
@@ -218,6 +238,38 @@ public class QuantityMeasurementApp {
         demonstrateLengthComparison(
                 1.0, LengthUnit.FEET,
                 12.0, LengthUnit.INCHES
+        );
+
+        System.out.println("\nLength Addition:");
+
+        demonstrateLengthAddition(
+                new QuantityLength(1.0, LengthUnit.FEET),
+                new QuantityLength(12.0, LengthUnit.INCHES)
+        );
+
+        demonstrateLengthAddition(
+                new QuantityLength(12.0, LengthUnit.INCHES),
+                new QuantityLength(1.0, LengthUnit.FEET)
+        );
+
+        demonstrateLengthAddition(
+                new QuantityLength(1.0, LengthUnit.YARDS),
+                new QuantityLength(3.0, LengthUnit.FEET)
+        );
+
+        demonstrateLengthAddition(
+                new QuantityLength(2.54, LengthUnit.CENTIMETERS),
+                new QuantityLength(1.0, LengthUnit.INCHES)
+        );
+
+        demonstrateLengthAddition(
+                new QuantityLength(5.0, LengthUnit.FEET),
+                new QuantityLength(0.0, LengthUnit.INCHES)
+        );
+
+        demonstrateLengthAddition(
+                new QuantityLength(5.0, LengthUnit.FEET),
+                new QuantityLength(-2.0, LengthUnit.FEET)
         );
     }
 }
