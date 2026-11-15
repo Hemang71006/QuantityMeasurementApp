@@ -1,3 +1,4 @@
+
 package com.quantitymeasurement;
 
 import com.quantitymeasurement.model.LengthUnit;
@@ -5,15 +6,15 @@ import com.quantitymeasurement.model.QuantityLength;
 
 /*
  * Project Name : Quantity Measurement App
- * Module : UC3 - Generic Quantity Length
+ * Module : UC5 - Unit-to-Unit Conversion
  * Author : Hemang
  * Date : 15-11-2026
- * Description : Runs the quantity measurement application and maintains compatibility with previous use cases.
+ * Description : Demonstrates length equality, comparison, and unit conversion.
  */
 
 public class QuantityMeasurementApp {
 
-    // Maintains backward compatibility with the previous Feet implementation.
+    // Maintains compatibility with the UC1 Feet implementation.
     public static final class Feet {
 
         private final QuantityLength quantity;
@@ -34,7 +35,6 @@ public class QuantityMeasurementApp {
             }
 
             Feet other = (Feet) obj;
-
             return quantity.equals(other.quantity);
         }
 
@@ -44,7 +44,7 @@ public class QuantityMeasurementApp {
         }
     }
 
-    // Maintains backward compatibility with the previous Inches implementation.
+    // Maintains compatibility with the UC2 Inches implementation.
     public static final class Inches {
 
         private final QuantityLength quantity;
@@ -65,7 +65,6 @@ public class QuantityMeasurementApp {
             }
 
             Inches other = (Inches) obj;
-
             return quantity.equals(other.quantity);
         }
 
@@ -78,25 +77,15 @@ public class QuantityMeasurementApp {
     // Compares two feet measurements.
     public static boolean areFeetEqual(double value1, double value2) {
 
-        QuantityLength first =
-                new QuantityLength(value1, LengthUnit.FEET);
-
-        QuantityLength second =
-                new QuantityLength(value2, LengthUnit.FEET);
-
-        return first.equals(second);
+        return new QuantityLength(value1, LengthUnit.FEET)
+                .equals(new QuantityLength(value2, LengthUnit.FEET));
     }
 
     // Compares two inches measurements.
     public static boolean areInchesEqual(double value1, double value2) {
 
-        QuantityLength first =
-                new QuantityLength(value1, LengthUnit.INCHES);
-
-        QuantityLength second =
-                new QuantityLength(value2, LengthUnit.INCHES);
-
-        return first.equals(second);
+        return new QuantityLength(value1, LengthUnit.INCHES)
+                .equals(new QuantityLength(value2, LengthUnit.INCHES));
     }
 
     // Compares feet and inches measurements.
@@ -105,66 +94,130 @@ public class QuantityMeasurementApp {
             double inchesValue
     ) {
 
-        QuantityLength feet =
-                new QuantityLength(feetValue, LengthUnit.FEET);
+        return new QuantityLength(feetValue, LengthUnit.FEET)
+                .equals(new QuantityLength(inchesValue, LengthUnit.INCHES));
+    }
 
-        QuantityLength inches =
-                new QuantityLength(inchesValue, LengthUnit.INCHES);
+    /**
+     * Demonstrates conversion using a raw numeric value and two units.
+     */
+    public static double demonstrateLengthConversion(
+            double value,
+            LengthUnit sourceUnit,
+            LengthUnit targetUnit
+    ) {
 
-        return feet.equals(inches);
+        double result =
+                QuantityLength.convert(value, sourceUnit, targetUnit);
+
+        System.out.println(
+                value + " " + sourceUnit + " = "
+                        + result + " " + targetUnit
+        );
+
+        return result;
+    }
+
+    /**
+     * Demonstrates conversion using an existing QuantityLength object.
+     */
+    public static QuantityLength demonstrateLengthConversion(
+            QuantityLength measurement,
+            LengthUnit targetUnit
+    ) {
+
+        if (measurement == null) {
+            throw new IllegalArgumentException(
+                    "Measurement cannot be null"
+            );
+        }
+
+        QuantityLength result = measurement.convertTo(targetUnit);
+
+        System.out.println(measurement + " = " + result);
+
+        return result;
+    }
+
+    // Demonstrates equality between two QuantityLength objects.
+    public static boolean demonstrateLengthEquality(
+            QuantityLength first,
+            QuantityLength second
+    ) {
+
+        boolean result = first.equals(second);
+
+        System.out.println(
+                first + " and " + second + " are equal: " + result
+        );
+
+        return result;
+    }
+
+    // Creates two measurements and demonstrates their equality.
+    public static boolean demonstrateLengthComparison(
+            double firstValue,
+            LengthUnit firstUnit,
+            double secondValue,
+            LengthUnit secondUnit
+    ) {
+
+        QuantityLength first =
+                new QuantityLength(firstValue, firstUnit);
+
+        QuantityLength second =
+                new QuantityLength(secondValue, secondUnit);
+
+        return demonstrateLengthEquality(first, second);
     }
 
     // Application entry point.
-    // Demonstrates equality across all supported length units.
     public static void main(String[] args) {
 
-        QuantityLength yard =
-                new QuantityLength(1.0, LengthUnit.YARDS);
-
-        QuantityLength threeFeet =
-                new QuantityLength(3.0, LengthUnit.FEET);
-
-        QuantityLength thirtySixInches =
-                new QuantityLength(36.0, LengthUnit.INCHES);
-
-        QuantityLength twoYards =
-                new QuantityLength(2.0, LengthUnit.YARDS);
-
-        QuantityLength twoCentimeters =
-                new QuantityLength(2.0, LengthUnit.CENTIMETERS);
-
-        QuantityLength oneCentimeter =
-                new QuantityLength(1.0, LengthUnit.CENTIMETERS);
-
-        QuantityLength equivalentInches =
-                new QuantityLength(0.393701, LengthUnit.INCHES);
-
-        System.out.println("Quantity Measurement App - UC4");
+        System.out.println("Quantity Measurement App - UC5");
         System.out.println("--------------------------------");
 
-        System.out.println(
-                "1 yard and 3 feet: " + yard.equals(threeFeet)
+        System.out.println("\nUnit Conversion:");
+
+        demonstrateLengthConversion(
+                1.0, LengthUnit.FEET, LengthUnit.INCHES
         );
 
-        System.out.println(
-                "1 yard and 36 inches: " + yard.equals(thirtySixInches)
+        demonstrateLengthConversion(
+                3.0, LengthUnit.YARDS, LengthUnit.FEET
         );
 
-        System.out.println(
-                "2 yards and 2 yards: " + twoYards.equals(
-                        new QuantityLength(2.0, LengthUnit.YARDS)
-                )
+        demonstrateLengthConversion(
+                36.0, LengthUnit.INCHES, LengthUnit.YARDS
         );
 
-        System.out.println(
-                "2 cm and 2 cm: " + twoCentimeters.equals(
-                        new QuantityLength(2.0, LengthUnit.CENTIMETERS)
-                )
+        demonstrateLengthConversion(
+                1.0, LengthUnit.CENTIMETERS, LengthUnit.INCHES
         );
 
-        System.out.println(
-                "1 cm and 0.393701 inches: " +
-                        oneCentimeter.equals(equivalentInches)
+        demonstrateLengthConversion(
+                0.0, LengthUnit.FEET, LengthUnit.INCHES
+        );
+
+        System.out.println("\nInstance Conversion:");
+
+        QuantityLength lengthInYards =
+                new QuantityLength(2.0, LengthUnit.YARDS);
+
+        demonstrateLengthConversion(
+                lengthInYards, LengthUnit.INCHES
+        );
+
+        System.out.println("\nLength Equality:");
+
+        demonstrateLengthComparison(
+                1.0, LengthUnit.YARDS,
+                3.0, LengthUnit.FEET
+        );
+
+        demonstrateLengthComparison(
+                1.0, LengthUnit.FEET,
+                12.0, LengthUnit.INCHES
         );
     }
 }
