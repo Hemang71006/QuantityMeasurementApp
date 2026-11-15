@@ -1,26 +1,30 @@
-
 package com.quantitymeasurement;
+
+import com.quantitymeasurement.model.LengthUnit;
+import com.quantitymeasurement.model.QuantityLength;
 
 /*
  * Project Name : Quantity Measurement App
- * Module : UC2 - Feet and Inches Measurement Equality
+ * Module : UC3 - Generic Quantity Length
  * Author : Hemang
- * Description : Compares Feet and Inches measurements using value-based equality.
+ * Date : 15-11-2026
+ * Description : Runs the quantity measurement application and maintains compatibility with previous use cases.
  */
 
 public class QuantityMeasurementApp {
 
-    // Represents an immutable measurement value in feet.
+    // Maintains backward compatibility with the previous Feet implementation.
     public static final class Feet {
 
-        private final double value;
+        private final QuantityLength quantity;
 
         public Feet(double value) {
-            this.value = value;
+            quantity = new QuantityLength(value, LengthUnit.FEET);
         }
 
         @Override
         public boolean equals(Object obj) {
+
             if (this == obj) {
                 return true;
             }
@@ -30,25 +34,28 @@ public class QuantityMeasurementApp {
             }
 
             Feet other = (Feet) obj;
-            return Double.compare(this.value, other.value) == 0;
+
+            return quantity.equals(other.quantity);
         }
 
         @Override
         public int hashCode() {
-            return Double.hashCode(value);
+            return quantity.hashCode();
         }
     }
 
+    // Maintains backward compatibility with the previous Inches implementation.
     public static final class Inches {
 
-        private final double value;
+        private final QuantityLength quantity;
 
         public Inches(double value) {
-            this.value = value;
+            quantity = new QuantityLength(value, LengthUnit.INCHES);
         }
 
         @Override
         public boolean equals(Object obj) {
+
             if (this == obj) {
                 return true;
             }
@@ -58,50 +65,85 @@ public class QuantityMeasurementApp {
             }
 
             Inches other = (Inches) obj;
-            return Double.compare(this.value, other.value) == 0;
+
+            return quantity.equals(other.quantity);
         }
 
         @Override
         public int hashCode() {
-            return Double.hashCode(value);
+            return quantity.hashCode();
         }
     }
 
+    // Compares two feet measurements.
     public static boolean areFeetEqual(double value1, double value2) {
-        Feet feet1 = new Feet(value1);
-        Feet feet2 = new Feet(value2);
 
-        return feet1.equals(feet2);
+        QuantityLength first =
+                new QuantityLength(value1, LengthUnit.FEET);
+
+        QuantityLength second =
+                new QuantityLength(value2, LengthUnit.FEET);
+
+        return first.equals(second);
     }
 
+    // Compares two inches measurements.
     public static boolean areInchesEqual(double value1, double value2) {
-        Inches inch1 = new Inches(value1);
-        Inches inch2 = new Inches(value2);
 
-        return inch1.equals(inch2);
+        QuantityLength first =
+                new QuantityLength(value1, LengthUnit.INCHES);
+
+        QuantityLength second =
+                new QuantityLength(value2, LengthUnit.INCHES);
+
+        return first.equals(second);
     }
 
-    public static boolean areFeetAndInchesEqual(double feetValue, double inchValue) {
-        double convertedFeet = feetValue * 12.0;
+    // Compares feet and inches measurements.
+    public static boolean areFeetAndInchesEqual(
+            double feetValue,
+            double inchesValue
+    ) {
 
-        return Double.compare(convertedFeet, inchValue) == 0;
+        QuantityLength feet =
+                new QuantityLength(feetValue, LengthUnit.FEET);
+
+        QuantityLength inches =
+                new QuantityLength(inchesValue, LengthUnit.INCHES);
+
+        return feet.equals(inches);
     }
 
+    // Application entry point.
     public static void main(String[] args) {
+
+        QuantityLength feet =
+                new QuantityLength(1.0, LengthUnit.FEET);
+
+        QuantityLength inches =
+                new QuantityLength(12.0, LengthUnit.INCHES);
+
+        QuantityLength firstInch =
+                new QuantityLength(1.0, LengthUnit.INCHES);
+
+        QuantityLength secondInch =
+                new QuantityLength(1.0, LengthUnit.INCHES);
 
         System.out.println("Quantity Measurement App");
         System.out.println("-------------------------");
 
         System.out.println(
-                "1.0 inch and 1.0 inch: " + areInchesEqual(1.0, 1.0)
+                "1.0 ft and 12.0 inches: " + feet.equals(inches)
         );
 
         System.out.println(
-                "1.0 ft and 1.0 ft: " + areFeetEqual(1.0, 1.0)
+                "1.0 inch and 1.0 inch: " +
+                        firstInch.equals(secondInch)
         );
 
         System.out.println(
-                "1.0 ft and 12.0 inches: " + areFeetAndInchesEqual(1.0, 12.0)
+                "1.0 ft and 1.0 ft: " +
+                        areFeetEqual(1.0, 1.0)
         );
     }
 }
