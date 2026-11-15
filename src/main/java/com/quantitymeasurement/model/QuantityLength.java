@@ -1,11 +1,14 @@
 package com.quantitymeasurement.model;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 /*
  * Project Name : Quantity Measurement App
- * Module : UC3 - Generic Quantity Length
+ * Module : UC4 - Extended Unit Support
  * Author : Hemang
  * Date : 15-11-2026
- * Description : Represents generic length measurements and compares them using a common base unit.
+ * Description : Represents generic length measurements and compares different units using feet as the common base unit.
  */
 
 public final class QuantityLength {
@@ -47,6 +50,13 @@ public final class QuantityLength {
         return value * unit.getConversionFactor();
     }
 
+    // Normalizes converted values to handle floating-point precision.
+    private BigDecimal normalizedBaseValue() {
+        return BigDecimal.valueOf(convertToBaseUnit())
+                .setScale(9, RoundingMode.HALF_UP)
+                .stripTrailingZeros();
+    }
+
     // Compares measurements after converting both to feet.
     @Override
     public boolean equals(Object obj) {
@@ -61,15 +71,13 @@ public final class QuantityLength {
 
         QuantityLength other = (QuantityLength) obj;
 
-        return Double.compare(
-                this.convertToBaseUnit(),
-                other.convertToBaseUnit()
-        ) == 0;
+        return normalizedBaseValue()
+                .compareTo(other.normalizedBaseValue()) == 0;
     }
 
-    // Generates a hash code using the converted base-unit value.
+    // Generates a hash code using the normalized base-unit value.
     @Override
     public int hashCode() {
-        return Double.hashCode(convertToBaseUnit());
+        return normalizedBaseValue().hashCode();
     }
 }

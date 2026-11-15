@@ -145,13 +145,13 @@ class QuantityLengthTest {
         );
     }
 
-    // Tests that unsupported units are rejected.
+    // Tests that a genuinely unsupported unit is rejected.
     @Test
     void givenUnsupportedUnit_whenRequested_shouldThrowException() {
 
         assertThrows(
                 IllegalArgumentException.class,
-                () -> LengthUnit.valueOf("YARDS")
+                () -> LengthUnit.valueOf("MILES")
         );
     }
 

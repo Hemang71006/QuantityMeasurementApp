@@ -115,35 +115,56 @@ public class QuantityMeasurementApp {
     }
 
     // Application entry point.
+    // Demonstrates equality across all supported length units.
     public static void main(String[] args) {
 
-        QuantityLength feet =
-                new QuantityLength(1.0, LengthUnit.FEET);
+        QuantityLength yard =
+                new QuantityLength(1.0, LengthUnit.YARDS);
 
-        QuantityLength inches =
-                new QuantityLength(12.0, LengthUnit.INCHES);
+        QuantityLength threeFeet =
+                new QuantityLength(3.0, LengthUnit.FEET);
 
-        QuantityLength firstInch =
-                new QuantityLength(1.0, LengthUnit.INCHES);
+        QuantityLength thirtySixInches =
+                new QuantityLength(36.0, LengthUnit.INCHES);
 
-        QuantityLength secondInch =
-                new QuantityLength(1.0, LengthUnit.INCHES);
+        QuantityLength twoYards =
+                new QuantityLength(2.0, LengthUnit.YARDS);
 
-        System.out.println("Quantity Measurement App");
-        System.out.println("-------------------------");
+        QuantityLength twoCentimeters =
+                new QuantityLength(2.0, LengthUnit.CENTIMETERS);
+
+        QuantityLength oneCentimeter =
+                new QuantityLength(1.0, LengthUnit.CENTIMETERS);
+
+        QuantityLength equivalentInches =
+                new QuantityLength(0.393701, LengthUnit.INCHES);
+
+        System.out.println("Quantity Measurement App - UC4");
+        System.out.println("--------------------------------");
 
         System.out.println(
-                "1.0 ft and 12.0 inches: " + feet.equals(inches)
+                "1 yard and 3 feet: " + yard.equals(threeFeet)
         );
 
         System.out.println(
-                "1.0 inch and 1.0 inch: " +
-                        firstInch.equals(secondInch)
+                "1 yard and 36 inches: " + yard.equals(thirtySixInches)
         );
 
         System.out.println(
-                "1.0 ft and 1.0 ft: " +
-                        areFeetEqual(1.0, 1.0)
+                "2 yards and 2 yards: " + twoYards.equals(
+                        new QuantityLength(2.0, LengthUnit.YARDS)
+                )
+        );
+
+        System.out.println(
+                "2 cm and 2 cm: " + twoCentimeters.equals(
+                        new QuantityLength(2.0, LengthUnit.CENTIMETERS)
+                )
+        );
+
+        System.out.println(
+                "1 cm and 0.393701 inches: " +
+                        oneCentimeter.equals(equivalentInches)
         );
     }
 }

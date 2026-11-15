@@ -2,7 +2,7 @@ package com.quantitymeasurement.model;
 
 /*
  * Project Name : Quantity Measurement App
- * Module : UC3 - Generic Quantity Length
+ * Module : UC4 - Extended Unit Support
  * Author : Hemang
  * Date : 15-11-2026
  * Description : Defines supported length units and their conversion factors to feet.
@@ -11,7 +11,9 @@ package com.quantitymeasurement.model;
 public enum LengthUnit {
 
     FEET(1.0),
-    INCHES(1.0 / 12.0);
+    INCHES(1.0 / 12.0),
+    YARDS(3.0),
+    CENTIMETERS(0.393701 / 12.0);
 
     // Conversion factor relative to the base unit feet.
     private final double conversionFactor;
