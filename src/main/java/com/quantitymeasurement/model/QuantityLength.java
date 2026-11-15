@@ -214,6 +214,71 @@ public final class QuantityLength {
         return add(first, second);
     }
 
+    // Adds two measurements and returns the result in the specified target unit.
+    public static QuantityLength add(
+            QuantityLength first,
+            QuantityLength second,
+            LengthUnit targetUnit) {
+
+        if (first == null || second == null) {
+            throw new IllegalArgumentException(
+                    "Measurements cannot be null"
+            );
+        }
+
+        if (targetUnit == null) {
+            throw new IllegalArgumentException(
+                    "Target unit cannot be null"
+            );
+        }
+
+        double firstInFeet = first.convertToBaseUnit();
+        double secondInFeet = second.convertToBaseUnit();
+
+        double sumInFeet = firstInFeet + secondInFeet;
+
+        return createFromBaseUnit(sumInFeet, targetUnit);
+    }
+
+    // Adds raw measurement values and returns the result in the target unit.
+    public static QuantityLength add(
+            double firstValue,
+            LengthUnit firstUnit,
+            double secondValue,
+            LengthUnit secondUnit,
+            LengthUnit targetUnit) {
+
+        QuantityLength first =
+                new QuantityLength(firstValue, firstUnit);
+
+        QuantityLength second =
+                new QuantityLength(secondValue, secondUnit);
+
+        return add(first, second, targetUnit);
+    }
+
+    // Converts a base-unit value into the requested unit and creates a new object.
+    private static QuantityLength createFromBaseUnit(
+            double baseValue,
+            LengthUnit targetUnit) {
+
+        if (!Double.isFinite(baseValue)) {
+            throw new ArithmeticException(
+                    "Addition result is outside the supported numeric range"
+            );
+        }
+
+        double convertedValue =
+                baseValue / targetUnit.getConversionFactor();
+
+        if (!Double.isFinite(convertedValue)) {
+            throw new ArithmeticException(
+                    "Converted result is outside the supported numeric range"
+            );
+        }
+
+        return new QuantityLength(convertedValue, targetUnit);
+    }
 
     /**
      * Compares two measurements after converting them to feet.

@@ -3,6 +3,8 @@ package com.quantitymeasurement;
 
 import com.quantitymeasurement.model.LengthUnit;
 import com.quantitymeasurement.model.QuantityLength;
+import com.quantitymeasurement.model.LengthUnit;
+import com.quantitymeasurement.model.QuantityLength;
 
 /*
  * Project Name : Quantity Measurement App
@@ -190,6 +192,24 @@ public class QuantityMeasurementApp {
         return result;
     }
 
+    // Demonstrates addition with an explicitly specified target unit.
+    public static QuantityLength demonstrateTargetUnitAddition(
+            QuantityLength first,
+            QuantityLength second,
+            LengthUnit targetUnit) {
+
+        QuantityLength result =
+                QuantityLength.add(first, second, targetUnit);
+
+        System.out.println(
+                first + " + " + second
+                        + " = " + result
+                        + " (Target Unit: " + targetUnit + ")"
+        );
+
+        return result;
+    }
+
 
     // Application entry point.
     public static void main(String[] args) {
@@ -270,6 +290,57 @@ public class QuantityMeasurementApp {
         demonstrateLengthAddition(
                 new QuantityLength(5.0, LengthUnit.FEET),
                 new QuantityLength(-2.0, LengthUnit.FEET)
+        );
+
+        System.out.println("\nUC7: Addition with Target Unit Specification");
+        System.out.println("--------------------------------------------");
+
+        demonstrateTargetUnitAddition(
+                new QuantityLength(1.0, LengthUnit.FEET),
+                new QuantityLength(12.0, LengthUnit.INCHES),
+                LengthUnit.FEET
+        );
+
+        demonstrateTargetUnitAddition(
+                new QuantityLength(1.0, LengthUnit.FEET),
+                new QuantityLength(12.0, LengthUnit.INCHES),
+                LengthUnit.INCHES
+        );
+
+        demonstrateTargetUnitAddition(
+                new QuantityLength(1.0, LengthUnit.FEET),
+                new QuantityLength(12.0, LengthUnit.INCHES),
+                LengthUnit.YARDS
+        );
+
+        demonstrateTargetUnitAddition(
+                new QuantityLength(1.0, LengthUnit.YARDS),
+                new QuantityLength(3.0, LengthUnit.FEET),
+                LengthUnit.YARDS
+        );
+
+        demonstrateTargetUnitAddition(
+                new QuantityLength(36.0, LengthUnit.INCHES),
+                new QuantityLength(1.0, LengthUnit.YARDS),
+                LengthUnit.FEET
+        );
+
+        demonstrateTargetUnitAddition(
+                new QuantityLength(2.54, LengthUnit.CENTIMETERS),
+                new QuantityLength(1.0, LengthUnit.INCHES),
+                LengthUnit.CENTIMETERS
+        );
+
+        demonstrateTargetUnitAddition(
+                new QuantityLength(5.0, LengthUnit.FEET),
+                new QuantityLength(0.0, LengthUnit.INCHES),
+                LengthUnit.YARDS
+        );
+
+        demonstrateTargetUnitAddition(
+                new QuantityLength(5.0, LengthUnit.FEET),
+                new QuantityLength(-2.0, LengthUnit.FEET),
+                LengthUnit.INCHES
         );
     }
 }
