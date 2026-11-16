@@ -3,23 +3,46 @@ package com.quantitymeasurement.interfaces;
 
 /*
  * Project Name : Quantity Measurement App
- * Module : UC10 - Measurable Unit Interface
+ * Module : UC14 - Temperature Measurement
  * Author : Hemang
  * Date : 15-11-2026
- * Description : Defines common conversion operations for all measurement units.
+ * Description : Defines common measurement conversion and optional arithmetic capabilities.
  */
 
 public interface IMeasurable {
 
-    // Returns the conversion factor relative to the category's base unit.
+    SupportsArithmetic DEFAULT_ARITHMETIC_SUPPORT = () -> true;
+
     double getConversionFactor();
 
-    // Converts a value from this unit into the category's base unit.
     double convertToBaseUnit(double value);
 
-    // Converts a value from the category's base unit into this unit.
     double convertFromBaseUnit(double baseValue);
 
-    // Returns the name of the measurement unit.
     String getUnitName();
+
+    // Returns whether this measurement category supports arithmetic.
+    default boolean supportsArithmetic() {
+        return DEFAULT_ARITHMETIC_SUPPORT.isSupported();
+    }
+
+    // Returns whether addition is supported.
+    default boolean supportsAddition() {
+        return supportsArithmetic();
+    }
+
+    // Returns whether subtraction is supported.
+    default boolean supportsSubtraction() {
+        return supportsArithmetic();
+    }
+
+    // Returns whether division is supported.
+    default boolean supportsDivision() {
+        return supportsArithmetic();
+    }
+
+    // Allows individual measurement categories to validate operations.
+    default void validateOperationSupport(String operation) {
+        // Existing measurement categories support arithmetic by default.
+    }
 }
