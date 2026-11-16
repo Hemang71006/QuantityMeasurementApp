@@ -10,10 +10,10 @@ import com.quantitymeasurement.model.WeightUnit;
 
 /*
  * Project Name : Quantity Measurement App
- * Module : UC10 - Generic Quantity Application
+ * Module : UC12 - Subtraction and Division
  * Author : Hemang
  * Date : 15-11-2026
- * Description : Demonstrates generic operations across measurement categories.
+ * Description : Demonstrates generic measurement operations across categories.
  */
 
 public class QuantityMeasurementApp {
@@ -29,7 +29,6 @@ public class QuantityMeasurementApp {
 
         @Override
         public boolean equals(Object obj) {
-
             if (this == obj) {
                 return true;
             }
@@ -59,7 +58,6 @@ public class QuantityMeasurementApp {
 
         @Override
         public boolean equals(Object obj) {
-
             if (this == obj) {
                 return true;
             }
@@ -101,7 +99,6 @@ public class QuantityMeasurementApp {
 
     // Displays a quantity without requiring its measurement category.
     public static void displayMeasurement(Quantity<?> measurement) {
-
         if (measurement == null) {
             throw new IllegalArgumentException(
                     "Measurement cannot be null"
@@ -193,10 +190,76 @@ public class QuantityMeasurementApp {
         return result;
     }
 
+    // Demonstrates subtraction using the first measurement's unit.
+    public static <U extends IMeasurable>
+    Quantity<U> demonstrateSubtraction(
+            Quantity<U> first,
+            Quantity<U> second) {
+
+        if (first == null || second == null) {
+            throw new IllegalArgumentException(
+                    "Measurements cannot be null"
+            );
+        }
+
+        Quantity<U> result = first.subtract(second);
+
+        System.out.println(
+                first + " - " + second + " = " + result
+        );
+
+        return result;
+    }
+
+    // Demonstrates subtraction using an explicitly selected target unit.
+    public static <U extends IMeasurable>
+    Quantity<U> demonstrateTargetUnitSubtraction(
+            Quantity<U> first,
+            Quantity<U> second,
+            U targetUnit) {
+
+        if (first == null || second == null || targetUnit == null) {
+            throw new IllegalArgumentException(
+                    "Measurements and target unit cannot be null"
+            );
+        }
+
+        Quantity<U> result = first.subtract(second, targetUnit);
+
+        System.out.println(
+                first + " - " + second
+                        + " = " + result
+                        + " (Target Unit: " + targetUnit.getUnitName() + ")"
+        );
+
+        return result;
+    }
+
+    // Demonstrates division and returns a dimensionless ratio.
+    public static <U extends IMeasurable>
+    double demonstrateDivision(
+            Quantity<U> first,
+            Quantity<U> second) {
+
+        if (first == null || second == null) {
+            throw new IllegalArgumentException(
+                    "Measurements cannot be null"
+            );
+        }
+
+        double result = first.divide(second);
+
+        System.out.println(
+                first + " / " + second + " = " + result
+        );
+
+        return result;
+    }
+
     // Application entry point.
     public static void main(String[] args) {
 
-        System.out.println("Quantity Measurement App - UC10");
+        System.out.println("Quantity Measurement App - UC12");
         System.out.println("--------------------------------");
 
         System.out.println("\nLength:");
@@ -217,6 +280,22 @@ public class QuantityMeasurementApp {
                 LengthUnit.INCHES
         );
 
+        demonstrateSubtraction(
+                new Quantity<>(5.0, LengthUnit.FEET),
+                new Quantity<>(12.0, LengthUnit.INCHES)
+        );
+
+        demonstrateTargetUnitSubtraction(
+                new Quantity<>(5.0, LengthUnit.FEET),
+                new Quantity<>(12.0, LengthUnit.INCHES),
+                LengthUnit.INCHES
+        );
+
+        demonstrateDivision(
+                new Quantity<>(10.0, LengthUnit.FEET),
+                new Quantity<>(2.0, LengthUnit.FEET)
+        );
+
         System.out.println("\nWeight:");
 
         Quantity<WeightUnit> oneKilogram =
@@ -233,6 +312,22 @@ public class QuantityMeasurementApp {
                 oneKilogram,
                 thousandGrams,
                 WeightUnit.GRAM
+        );
+
+        demonstrateSubtraction(
+                new Quantity<>(5.0, WeightUnit.KILOGRAM),
+                new Quantity<>(1000.0, WeightUnit.GRAM)
+        );
+
+        demonstrateTargetUnitSubtraction(
+                new Quantity<>(5.0, WeightUnit.KILOGRAM),
+                new Quantity<>(1000.0, WeightUnit.GRAM),
+                WeightUnit.GRAM
+        );
+
+        demonstrateDivision(
+                new Quantity<>(10.0, WeightUnit.KILOGRAM),
+                new Quantity<>(2.0, WeightUnit.KILOGRAM)
         );
 
         System.out.println("\nVolume:");
@@ -256,6 +351,22 @@ public class QuantityMeasurementApp {
         demonstrateAddition(
                 oneLitre,
                 fiveHundredMillilitres
+        );
+
+        demonstrateSubtraction(
+                new Quantity<>(2.0, VolumeUnit.LITRE),
+                new Quantity<>(500.0, VolumeUnit.MILLILITRE)
+        );
+
+        demonstrateTargetUnitSubtraction(
+                new Quantity<>(2.0, VolumeUnit.LITRE),
+                new Quantity<>(500.0, VolumeUnit.MILLILITRE),
+                VolumeUnit.MILLILITRE
+        );
+
+        demonstrateDivision(
+                new Quantity<>(2.0, VolumeUnit.LITRE),
+                new Quantity<>(500.0, VolumeUnit.MILLILITRE)
         );
 
         System.out.println("\nWildcard Demonstration:");

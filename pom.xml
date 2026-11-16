@@ -41,6 +41,14 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.7.0</version>
+                <configuration>
+                    <mainClass>com.quantitymeasurement.QuantityMeasurementApp</mainClass>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
