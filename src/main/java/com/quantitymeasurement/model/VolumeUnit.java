@@ -1,81 +1,66 @@
-
 package com.quantitymeasurement.model;
-
-import com.quantitymeasurement.interfaces.IMeasurable;
 
 /*
  * Project Name : Quantity Measurement App
- * Module : UC10 - Volume Unit Extension
+ * Module : UC11 - Volume Measurement
  * Author : Hemang
  * Date : 15-11-2026
- * Description : Adds volume units using the common measurable interface.
+ * Description : Defines volume units and their conversions using litre as the base unit.
  */
+
+import com.quantitymeasurement.interfaces.IMeasurable;
 
 public enum VolumeUnit implements IMeasurable {
 
     LITRE(1.0),
-    MILLILITRE(0.001);
+    MILLILITRE(0.001),
+    GALLON(3.78541);
 
     private final double conversionFactor;
 
-    // Initializes the conversion factor relative to litres.
     VolumeUnit(double conversionFactor) {
         this.conversionFactor = conversionFactor;
     }
 
-    // Returns the conversion factor relative to the base unit.
     @Override
     public double getConversionFactor() {
         return conversionFactor;
     }
 
-    // Converts a volume value into litres.
     @Override
     public double convertToBaseUnit(double value) {
+        validateFinite(value);
 
-        validateValue(value);
+        double baseValue = value * conversionFactor;
 
-        double result = value * conversionFactor;
-
-        if (!Double.isFinite(result)) {
-            throw new ArithmeticException(
-                    "Volume conversion result is out of range"
-            );
+        if (!Double.isFinite(baseValue)) {
+            throw new ArithmeticException("Volume conversion overflow");
         }
 
-        return result;
+        return baseValue;
     }
 
-    // Converts a value in litres into this unit.
     @Override
     public double convertFromBaseUnit(double baseValue) {
+        validateFinite(baseValue);
 
-        validateValue(baseValue);
+        double convertedValue = baseValue / conversionFactor;
 
-        double result = baseValue / conversionFactor;
-
-        if (!Double.isFinite(result)) {
-            throw new ArithmeticException(
-                    "Volume conversion result is out of range"
-            );
+        if (!Double.isFinite(convertedValue)) {
+            throw new ArithmeticException("Volume conversion overflow");
         }
 
-        return result;
+        return convertedValue;
     }
 
-    // Returns the unit name.
     @Override
     public String getUnitName() {
         return name();
     }
 
-    // Validates volume values.
-    private void validateValue(double value) {
-
+    private static void validateFinite(double value) {
         if (!Double.isFinite(value)) {
-            throw new IllegalArgumentException(
-                    "Volume value must be finite"
-            );
+            throw new IllegalArgumentException("Volume value must be finite");
         }
     }
 }
