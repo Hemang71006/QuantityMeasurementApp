@@ -2,18 +2,21 @@
 package com.quantitymeasurement.model;
 
 import com.quantitymeasurement.interfaces.IMeasurable;
+
 import java.util.Objects;
 import java.util.function.DoubleBinaryOperator;
 
 /*
  * Project Name : Quantity Measurement App
- * Module : UC13 - Centralized Arithmetic Logic
+ * Module : UC14 - Temperature Measurement with Selective Arithmetic Support
  * Author : Hemang
  * Date : 15-11-2026
- * Description : Implements generic quantity operations using centralized arithmetic logic.
+ * Description : Implements generic quantity operations with measurement-specific arithmetic capabilities.
  */
 
 public final class Quantity<U extends IMeasurable> {
+
+    private static final double TEMPERATURE_EPSILON = 1e-9;
 
     private final double value;
     private final U unit;
@@ -86,6 +89,8 @@ public final class Quantity<U extends IMeasurable> {
     public Quantity<U> add(Quantity<U> other, U targetUnit) {
         validateArithmeticOperands(other, targetUnit, true);
 
+        unit.validateOperationSupport(ArithmeticOperation.ADD.name());
+
         double resultInBaseUnit =
                 performBaseArithmetic(other, ArithmeticOperation.ADD);
 
@@ -98,6 +103,8 @@ public final class Quantity<U extends IMeasurable> {
 
     public Quantity<U> subtract(Quantity<U> other, U targetUnit) {
         validateArithmeticOperands(other, targetUnit, true);
+
+        unit.validateOperationSupport(ArithmeticOperation.SUBTRACT.name());
 
         double resultInBaseUnit =
                 performBaseArithmetic(other, ArithmeticOperation.SUBTRACT);
@@ -113,6 +120,8 @@ public final class Quantity<U extends IMeasurable> {
      */
     public double divide(Quantity<U> other) {
         validateArithmeticOperands(other, null, false);
+
+        unit.validateOperationSupport(ArithmeticOperation.DIVIDE.name());
 
         return performBaseArithmetic(
                 other,
@@ -214,14 +223,23 @@ public final class Quantity<U extends IMeasurable> {
             return false;
         }
 
-        return Double.compare(
-                convertToBaseUnit(),
-                other.convertToBaseUnit()
-        ) == 0;
+        double firstBaseValue = convertToBaseUnit();
+        double secondBaseValue = other.convertToBaseUnit();
+
+        if (unit instanceof TemperatureUnit) {
+            return Math.abs(firstBaseValue - secondBaseValue)
+                    <= TEMPERATURE_EPSILON;
+        }
+
+        return Double.compare(firstBaseValue, secondBaseValue) == 0;
     }
 
     @Override
     public int hashCode() {
+        if (unit instanceof TemperatureUnit) {
+            return Objects.hash(unit.getClass());
+        }
+
         return Objects.hash(
                 unit.getClass(),
                 Double.hashCode(convertToBaseUnit())

@@ -5,12 +5,13 @@ import com.quantitymeasurement.interfaces.IMeasurable;
 import com.quantitymeasurement.model.LengthUnit;
 import com.quantitymeasurement.model.Quantity;
 import com.quantitymeasurement.model.QuantityLength;
+import com.quantitymeasurement.model.TemperatureUnit;
 import com.quantitymeasurement.model.VolumeUnit;
 import com.quantitymeasurement.model.WeightUnit;
 
 /*
  * Project Name : Quantity Measurement App
- * Module : UC12 - Subtraction and Division
+ * Module : UC14 - Temperature Measurement with Selective Arithmetic Support
  * Author : Hemang
  * Date : 15-11-2026
  * Description : Demonstrates generic measurement operations across categories.
@@ -256,10 +257,34 @@ public class QuantityMeasurementApp {
         return result;
     }
 
+    // Demonstrates unsupported temperature arithmetic.
+    private static void demonstrateUnsupportedTemperatureOperations(
+            Quantity<TemperatureUnit> first,
+            Quantity<TemperatureUnit> second) {
+
+        try {
+            demonstrateAddition(first, second);
+        } catch (UnsupportedOperationException exception) {
+            System.out.println("Addition: " + exception.getMessage());
+        }
+
+        try {
+            demonstrateSubtraction(first, second);
+        } catch (UnsupportedOperationException exception) {
+            System.out.println("Subtraction: " + exception.getMessage());
+        }
+
+        try {
+            demonstrateDivision(first, second);
+        } catch (UnsupportedOperationException exception) {
+            System.out.println("Division: " + exception.getMessage());
+        }
+    }
+
     // Application entry point.
     public static void main(String[] args) {
 
-        System.out.println("Quantity Measurement App - UC12");
+        System.out.println("Quantity Measurement App - UC14");
         System.out.println("--------------------------------");
 
         System.out.println("\nLength:");
@@ -369,11 +394,54 @@ public class QuantityMeasurementApp {
                 new Quantity<>(500.0, VolumeUnit.MILLILITRE)
         );
 
+        System.out.println("\nTemperature:");
+
+        Quantity<TemperatureUnit> zeroCelsius =
+                new Quantity<>(0.0, TemperatureUnit.CELSIUS);
+
+        Quantity<TemperatureUnit> thirtyTwoFahrenheit =
+                new Quantity<>(32.0, TemperatureUnit.FAHRENHEIT);
+
+        Quantity<TemperatureUnit> hundredCelsius =
+                new Quantity<>(100.0, TemperatureUnit.CELSIUS);
+
+        Quantity<TemperatureUnit> kelvinTemperature =
+                new Quantity<>(273.15, TemperatureUnit.KELVIN);
+
+        demonstrateEquality(zeroCelsius, thirtyTwoFahrenheit);
+        demonstrateEquality(zeroCelsius, kelvinTemperature);
+
+        demonstrateConversion(
+                hundredCelsius,
+                TemperatureUnit.FAHRENHEIT
+        );
+
+        demonstrateConversion(
+                thirtyTwoFahrenheit,
+                TemperatureUnit.CELSIUS
+        );
+
+        demonstrateConversion(
+                kelvinTemperature,
+                TemperatureUnit.CELSIUS
+        );
+
+        demonstrateConversion(
+                zeroCelsius,
+                TemperatureUnit.KELVIN
+        );
+
+        demonstrateUnsupportedTemperatureOperations(
+                zeroCelsius,
+                hundredCelsius
+        );
+
         System.out.println("\nWildcard Demonstration:");
 
         displayMeasurement(oneFoot);
         displayMeasurement(oneKilogram);
         displayMeasurement(oneLitre);
+        displayMeasurement(zeroCelsius);
 
         System.out.println("\nDifferent Category Comparison:");
 
