@@ -1,6 +1,8 @@
 
 package com.quantitymeasurement;
 
+import com.quantitymeasurement.controller.QuantityMeasurementController;
+import com.quantitymeasurement.dto.QuantityDTO;
 import com.quantitymeasurement.interfaces.IMeasurable;
 import com.quantitymeasurement.model.LengthUnit;
 import com.quantitymeasurement.model.Quantity;
@@ -8,16 +10,42 @@ import com.quantitymeasurement.model.QuantityLength;
 import com.quantitymeasurement.model.TemperatureUnit;
 import com.quantitymeasurement.model.VolumeUnit;
 import com.quantitymeasurement.model.WeightUnit;
+import com.quantitymeasurement.repository.QuantityMeasurementCacheRepository;
+import com.quantitymeasurement.service.QuantityMeasurementServiceImpl;
 
 /*
  * Project Name : Quantity Measurement App
- * Module : UC14 - Temperature Measurement with Selective Arithmetic Support
+ * Module : UC15 - N-Tier Architecture Refactoring
  * Author : Hemang
  * Date : 15-11-2026
- * Description : Demonstrates generic measurement operations across categories.
+ * Description : Application entry point and facade for quantity measurement operations.
  */
 
 public class QuantityMeasurementApp {
+
+    private static final QuantityMeasurementApp INSTANCE =
+            new QuantityMeasurementApp();
+
+    private final QuantityMeasurementController controller;
+
+    private QuantityMeasurementApp() {
+        QuantityMeasurementCacheRepository repository =
+                QuantityMeasurementCacheRepository.getInstance();
+
+        QuantityMeasurementServiceImpl service =
+                new QuantityMeasurementServiceImpl(repository);
+
+        controller = new QuantityMeasurementController(service);
+    }
+
+    // Returns the singleton application instance.
+    public static QuantityMeasurementApp getInstance() {
+        return INSTANCE;
+    }
+
+    public QuantityMeasurementController getController() {
+        return controller;
+    }
 
     // Maintains compatibility with the UC1 Feet implementation.
     public static final class Feet {
@@ -160,9 +188,7 @@ public class QuantityMeasurementApp {
 
         Quantity<U> result = first.add(second);
 
-        System.out.println(
-                first + " + " + second + " = " + result
-        );
+        System.out.println(first + " + " + second + " = " + result);
 
         return result;
     }
@@ -205,9 +231,7 @@ public class QuantityMeasurementApp {
 
         Quantity<U> result = first.subtract(second);
 
-        System.out.println(
-                first + " - " + second + " = " + result
-        );
+        System.out.println(first + " - " + second + " = " + result);
 
         return result;
     }
@@ -250,9 +274,7 @@ public class QuantityMeasurementApp {
 
         double result = first.divide(second);
 
-        System.out.println(
-                first + " / " + second + " = " + result
-        );
+        System.out.println(first + " / " + second + " = " + result);
 
         return result;
     }
@@ -281,13 +303,107 @@ public class QuantityMeasurementApp {
         }
     }
 
+    // Demonstrates operations through the controller and service layers.
+    private void demonstrateControllerOperations() {
+
+        System.out.println("\nUC15 - N-Tier Architecture Demonstration");
+        System.out.println("----------------------------------------");
+
+        System.out.println("\nLength:");
+
+        QuantityDTO oneFoot =
+                new QuantityDTO(1.0, "LENGTH", "FEET");
+
+        QuantityDTO twelveInches =
+                new QuantityDTO(12.0, "LENGTH", "INCHES");
+
+        controller.compare(oneFoot, twelveInches);
+
+        controller.convert(oneFoot, "INCHES");
+
+        controller.add(oneFoot, twelveInches);
+
+        controller.add(oneFoot, twelveInches, "INCHES");
+
+        controller.subtract(
+                new QuantityDTO(5.0, "LENGTH", "FEET"),
+                twelveInches
+        );
+
+        controller.subtract(
+                new QuantityDTO(5.0, "LENGTH", "FEET"),
+                twelveInches,
+                "INCHES"
+        );
+
+        controller.divide(
+                new QuantityDTO(10.0, "LENGTH", "FEET"),
+                new QuantityDTO(2.0, "LENGTH", "FEET")
+        );
+
+        System.out.println("\nWeight:");
+
+        QuantityDTO oneKilogram =
+                new QuantityDTO(1.0, "WEIGHT", "KILOGRAM");
+
+        QuantityDTO thousandGrams =
+                new QuantityDTO(1000.0, "WEIGHT", "GRAM");
+
+        controller.compare(oneKilogram, thousandGrams);
+        controller.convert(oneKilogram, "GRAM");
+        controller.add(oneKilogram, thousandGrams);
+        controller.add(oneKilogram, thousandGrams, "GRAM");
+
+        System.out.println("\nVolume:");
+
+        QuantityDTO oneLitre =
+                new QuantityDTO(1.0, "VOLUME", "LITRE");
+
+        QuantityDTO fiveHundredMillilitres =
+                new QuantityDTO(500.0, "VOLUME", "MILLILITRE");
+
+        controller.compare(
+                oneLitre,
+                new QuantityDTO(1000.0, "VOLUME", "MILLILITRE")
+        );
+
+        controller.convert(oneLitre, "MILLILITRE");
+        controller.add(oneLitre, fiveHundredMillilitres);
+
+        System.out.println("\nTemperature:");
+
+        QuantityDTO zeroCelsius =
+                new QuantityDTO(0.0, "TEMPERATURE", "CELSIUS");
+
+        QuantityDTO thirtyTwoFahrenheit =
+                new QuantityDTO(32.0, "TEMPERATURE", "FAHRENHEIT");
+
+        controller.compare(zeroCelsius, thirtyTwoFahrenheit);
+        controller.convert(zeroCelsius, "KELVIN");
+
+        controller.add(
+                zeroCelsius,
+                new QuantityDTO(100.0, "TEMPERATURE", "CELSIUS")
+        );
+
+        System.out.println("\nPersisted Measurement History:");
+
+        controller.getMeasurementHistory().forEach(
+                System.out::println
+        );
+    }
+
     // Application entry point.
     public static void main(String[] args) {
 
-        System.out.println("Quantity Measurement App - UC14");
+        QuantityMeasurementApp app = getInstance();
+
+        System.out.println("Quantity Measurement App - UC15");
         System.out.println("--------------------------------");
 
-        System.out.println("\nLength:");
+        app.demonstrateControllerOperations();
+
+        System.out.println("\nPrevious UC1-UC14 Compatibility Demonstrations:");
 
         Quantity<LengthUnit> oneFoot =
                 new Quantity<>(1.0, LengthUnit.FEET);
@@ -296,7 +412,9 @@ public class QuantityMeasurementApp {
                 new Quantity<>(12.0, LengthUnit.INCHES);
 
         demonstrateEquality(oneFoot, twelveInches);
+
         demonstrateConversion(oneFoot, LengthUnit.INCHES);
+
         demonstrateAddition(oneFoot, twelveInches);
 
         demonstrateTargetUnitAddition(
@@ -321,8 +439,6 @@ public class QuantityMeasurementApp {
                 new Quantity<>(2.0, LengthUnit.FEET)
         );
 
-        System.out.println("\nWeight:");
-
         Quantity<WeightUnit> oneKilogram =
                 new Quantity<>(1.0, WeightUnit.KILOGRAM);
 
@@ -339,62 +455,20 @@ public class QuantityMeasurementApp {
                 WeightUnit.GRAM
         );
 
-        demonstrateSubtraction(
-                new Quantity<>(5.0, WeightUnit.KILOGRAM),
-                new Quantity<>(1000.0, WeightUnit.GRAM)
-        );
-
-        demonstrateTargetUnitSubtraction(
-                new Quantity<>(5.0, WeightUnit.KILOGRAM),
-                new Quantity<>(1000.0, WeightUnit.GRAM),
-                WeightUnit.GRAM
-        );
-
-        demonstrateDivision(
-                new Quantity<>(10.0, WeightUnit.KILOGRAM),
-                new Quantity<>(2.0, WeightUnit.KILOGRAM)
-        );
-
-        System.out.println("\nVolume:");
-
         Quantity<VolumeUnit> oneLitre =
                 new Quantity<>(1.0, VolumeUnit.LITRE);
-
-        Quantity<VolumeUnit> fiveHundredMillilitres =
-                new Quantity<>(500.0, VolumeUnit.MILLILITRE);
 
         demonstrateEquality(
                 oneLitre,
                 new Quantity<>(1000.0, VolumeUnit.MILLILITRE)
         );
 
-        demonstrateConversion(
-                oneLitre,
-                VolumeUnit.MILLILITRE
-        );
+        demonstrateConversion(oneLitre, VolumeUnit.MILLILITRE);
 
         demonstrateAddition(
                 oneLitre,
-                fiveHundredMillilitres
-        );
-
-        demonstrateSubtraction(
-                new Quantity<>(2.0, VolumeUnit.LITRE),
                 new Quantity<>(500.0, VolumeUnit.MILLILITRE)
         );
-
-        demonstrateTargetUnitSubtraction(
-                new Quantity<>(2.0, VolumeUnit.LITRE),
-                new Quantity<>(500.0, VolumeUnit.MILLILITRE),
-                VolumeUnit.MILLILITRE
-        );
-
-        demonstrateDivision(
-                new Quantity<>(2.0, VolumeUnit.LITRE),
-                new Quantity<>(500.0, VolumeUnit.MILLILITRE)
-        );
-
-        System.out.println("\nTemperature:");
 
         Quantity<TemperatureUnit> zeroCelsius =
                 new Quantity<>(0.0, TemperatureUnit.CELSIUS);
@@ -402,29 +476,7 @@ public class QuantityMeasurementApp {
         Quantity<TemperatureUnit> thirtyTwoFahrenheit =
                 new Quantity<>(32.0, TemperatureUnit.FAHRENHEIT);
 
-        Quantity<TemperatureUnit> hundredCelsius =
-                new Quantity<>(100.0, TemperatureUnit.CELSIUS);
-
-        Quantity<TemperatureUnit> kelvinTemperature =
-                new Quantity<>(273.15, TemperatureUnit.KELVIN);
-
         demonstrateEquality(zeroCelsius, thirtyTwoFahrenheit);
-        demonstrateEquality(zeroCelsius, kelvinTemperature);
-
-        demonstrateConversion(
-                hundredCelsius,
-                TemperatureUnit.FAHRENHEIT
-        );
-
-        demonstrateConversion(
-                thirtyTwoFahrenheit,
-                TemperatureUnit.CELSIUS
-        );
-
-        demonstrateConversion(
-                kelvinTemperature,
-                TemperatureUnit.CELSIUS
-        );
 
         demonstrateConversion(
                 zeroCelsius,
@@ -433,7 +485,7 @@ public class QuantityMeasurementApp {
 
         demonstrateUnsupportedTemperatureOperations(
                 zeroCelsius,
-                hundredCelsius
+                new Quantity<>(100.0, TemperatureUnit.CELSIUS)
         );
 
         System.out.println("\nWildcard Demonstration:");
