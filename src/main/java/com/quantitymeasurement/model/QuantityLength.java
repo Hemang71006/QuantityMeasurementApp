@@ -3,28 +3,18 @@ package com.quantitymeasurement.model;
 
 /*
  * Project Name : Quantity Measurement App
- * Module : UC5 - Unit-to-Unit Conversion
+ * Module : UC8 - QuantityLength Refactoring
  * Author : Hemang
  * Date : 15-11-2026
- * Description : Represents immutable length measurements with conversion and equality operations.
+ * Description : Represents immutable length measurements with comparison, conversion, and addition operations.
  */
 
-/**
- * Represents a length measurement using a numeric value and a unit.
- * All supported units are normalized to feet for conversion and comparison.
- */
 public final class QuantityLength {
 
     private final double value;
     private final LengthUnit unit;
 
-    /**
-     * Creates a length measurement.
-     *
-     * @param value numeric measurement value
-     * @param unit measurement unit
-     * @throws IllegalArgumentException if value is not finite or unit is null
-     */
+    // Creates a length measurement.
     public QuantityLength(double value, LengthUnit unit) {
 
         if (!Double.isFinite(value)) {
@@ -43,92 +33,60 @@ public final class QuantityLength {
         this.unit = unit;
     }
 
+    // Returns the measurement value.
     public double getValue() {
         return value;
     }
 
+    // Returns the measurement unit.
     public LengthUnit getUnit() {
         return unit;
     }
 
-    /**
-     * Converts this measurement into the base unit feet.
-     *
-     * @return measurement expressed in feet
-     */
+    // Delegates conversion to the unit enum.
     public double convertToBaseUnit() {
-        return value * unit.getConversionFactor();
+        return unit.convertToBaseUnit(value);
     }
 
-    /**
-     * Converts a value from one length unit to another.
-     *
-     * @param value measurement value
-     * @param sourceUnit original unit
-     * @param targetUnit desired unit
-     * @return converted measurement value
-     * @throws IllegalArgumentException if value is not finite or a unit is null
-     * @throws ArithmeticException if the result cannot be represented as a finite double
-     */
+    // Converts a value from one length unit to another.
     public static double convert(
             double value,
             LengthUnit sourceUnit,
-            LengthUnit targetUnit
-    ) {
+            LengthUnit targetUnit) {
 
         if (!Double.isFinite(value)) {
             throw new IllegalArgumentException(
-                    "Conversion value must be a finite number"
+                    "Measurement value must be finite"
             );
         }
 
         if (sourceUnit == null || targetUnit == null) {
             throw new IllegalArgumentException(
-                    "Source unit and target unit cannot be null"
+                    "Units cannot be null"
             );
         }
 
-        // Convert the source measurement into feet.
-        double valueInFeet =
-                value * sourceUnit.getConversionFactor();
+        double baseValue = sourceUnit.convertToBaseUnit(value);
 
-        // Convert the base-unit value into the target unit.
-        double convertedValue =
-                valueInFeet / targetUnit.getConversionFactor();
-
-        if (!Double.isFinite(convertedValue)) {
-            throw new ArithmeticException(
-                    "Conversion result exceeds the finite double range"
-            );
-        }
-
-        return convertedValue;
+        return targetUnit.convertFromBaseUnit(baseValue);
     }
 
-    /**
-     * Converts this measurement into the requested unit.
-     *
-     * @param targetUnit desired unit
-     * @return a new QuantityLength containing the converted measurement
-     */
+    // Converts this measurement into the requested unit.
     public QuantityLength convertTo(LengthUnit targetUnit) {
 
+        if (targetUnit == null) {
+            throw new IllegalArgumentException(
+                    "Target unit cannot be null"
+            );
+        }
+
         double convertedValue =
-                convert(value, unit, targetUnit);
+                targetUnit.convertFromBaseUnit(convertToBaseUnit());
 
         return new QuantityLength(convertedValue, targetUnit);
     }
 
-
-    /**
-     * Adds another length measurement to this measurement.
-     * The returned measurement uses this object's unit.
-     *
-     * @param other second length measurement
-     * @return a new QuantityLength in the unit of this measurement
-     * @throws IllegalArgumentException if the other measurement is null
-     * @throws ArithmeticException if the result is not finite
-     */
+    // Adds another measurement to this measurement.
     public QuantityLength add(QuantityLength other) {
 
         if (other == null) {
@@ -140,20 +98,10 @@ public final class QuantityLength {
         return add(this, other);
     }
 
-    /**
-     * Adds two length measurements.
-     * The result uses the unit of the first measurement.
-     *
-     * @param first first length measurement
-     * @param second second length measurement
-     * @return a new QuantityLength in the first measurement's unit
-     * @throws IllegalArgumentException if either measurement is null
-     * @throws ArithmeticException if the result is not finite
-     */
+    // Adds two measurements and returns the result in the first unit.
     public static QuantityLength add(
             QuantityLength first,
-            QuantityLength second
-    ) {
+            QuantityLength second) {
 
         if (first == null || second == null) {
             throw new IllegalArgumentException(
@@ -161,49 +109,20 @@ public final class QuantityLength {
             );
         }
 
-        // Convert both measurements to the common base unit feet.
         double firstInFeet = first.convertToBaseUnit();
         double secondInFeet = second.convertToBaseUnit();
 
-        // Add both measurements in feet.
         double sumInFeet = firstInFeet + secondInFeet;
 
-        if (!Double.isFinite(sumInFeet)) {
-            throw new ArithmeticException(
-                    "Addition result exceeds the finite double range"
-            );
-        }
-
-        // Convert the sum into the first measurement's unit.
-        double resultValue =
-                sumInFeet / first.unit.getConversionFactor();
-
-        if (!Double.isFinite(resultValue)) {
-            throw new ArithmeticException(
-                    "Addition result cannot be represented as a finite double"
-            );
-        }
-
-        // Return a new immutable measurement.
-        return new QuantityLength(resultValue, first.unit);
+        return createFromBaseUnit(sumInFeet, first.unit);
     }
 
-    /**
-     * Adds two raw length values using their respective units.
-     * The result uses the unit of the first value.
-     *
-     * @param firstValue first measurement value
-     * @param firstUnit first measurement unit
-     * @param secondValue second measurement value
-     * @param secondUnit second measurement unit
-     * @return a new QuantityLength in the first unit
-     */
+    // Adds raw measurement values and returns the result in the first unit.
     public static QuantityLength add(
             double firstValue,
             LengthUnit firstUnit,
             double secondValue,
-            LengthUnit secondUnit
-    ) {
+            LengthUnit secondUnit) {
 
         QuantityLength first =
                 new QuantityLength(firstValue, firstUnit);
@@ -222,7 +141,7 @@ public final class QuantityLength {
 
         if (first == null || second == null) {
             throw new IllegalArgumentException(
-                    "Measurements cannot be null"
+                    "Length measurements cannot be null"
             );
         }
 
@@ -240,7 +159,7 @@ public final class QuantityLength {
         return createFromBaseUnit(sumInFeet, targetUnit);
     }
 
-    // Adds raw measurement values and returns the result in the target unit.
+    // Adds raw values and returns the result in the specified target unit.
     public static QuantityLength add(
             double firstValue,
             LengthUnit firstUnit,
@@ -257,38 +176,32 @@ public final class QuantityLength {
         return add(first, second, targetUnit);
     }
 
-    // Converts a base-unit value into the requested unit and creates a new object.
+    // Creates a new measurement by converting a base unit value into the target unit.
     private static QuantityLength createFromBaseUnit(
             double baseValue,
             LengthUnit targetUnit) {
 
         if (!Double.isFinite(baseValue)) {
             throw new ArithmeticException(
-                    "Addition result is outside the supported numeric range"
+                    "Addition result exceeds the finite double range"
+            );
+        }
+
+        if (targetUnit == null) {
+            throw new IllegalArgumentException(
+                    "Target unit cannot be null"
             );
         }
 
         double convertedValue =
-                baseValue / targetUnit.getConversionFactor();
-
-        if (!Double.isFinite(convertedValue)) {
-            throw new ArithmeticException(
-                    "Converted result is outside the supported numeric range"
-            );
-        }
+                targetUnit.convertFromBaseUnit(baseValue);
 
         return new QuantityLength(convertedValue, targetUnit);
     }
 
-    /**
-     * Compares two measurements after converting them to feet.
-     *
-     * @param obj object to compare
-     * @return true if both measurements represent the same length
-     */
+    // Compares two measurements after converting them to feet.
     @Override
     public boolean equals(Object obj) {
-
         if (this == obj) {
             return true;
         }
@@ -299,27 +212,19 @@ public final class QuantityLength {
 
         QuantityLength other = (QuantityLength) obj;
 
-        return Double.compare(
-                this.convertToBaseUnit(),
-                other.convertToBaseUnit()
-        ) == 0;
+        double firstValue = convertToBaseUnit();
+        double secondValue = other.convertToBaseUnit();
+
+        return Math.abs(firstValue - secondValue) < 1e-9;
     }
 
-    /**
-     * Generates a hash code using the base-unit value.
-     *
-     * @return hash code of the measurement
-     */
+    // Generates a hash code using the base unit value.
     @Override
     public int hashCode() {
         return Double.hashCode(convertToBaseUnit());
     }
 
-    /**
-     * Returns a readable representation of the measurement.
-     *
-     * @return measurement value and unit
-     */
+    // Returns a readable representation of the measurement.
     @Override
     public String toString() {
         return value + " " + unit;

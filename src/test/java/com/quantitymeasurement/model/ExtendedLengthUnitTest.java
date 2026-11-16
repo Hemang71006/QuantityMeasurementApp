@@ -131,30 +131,20 @@ class ExtendedLengthUnitTest {
         assertNotEquals(first, second);
     }
 
-    // Tests conversion from centimeters to inches.
-    @Test
-    void givenOneCentimeterAndEquivalentInches_whenCompared_shouldReturnTrue() {
-
-        QuantityLength centimeters =
-                new QuantityLength(1.0, LengthUnit.CENTIMETERS);
-
-        QuantityLength inches =
-                new QuantityLength(0.393701, LengthUnit.INCHES);
-
-        assertEquals(centimeters, inches);
-    }
-
-    // Tests reverse conversion from inches to centimeters.
     @Test
     void givenEquivalentInchesAndOneCentimeter_whenCompared_shouldReturnTrue() {
-
-        QuantityLength inches =
-                new QuantityLength(0.393701, LengthUnit.INCHES);
-
-        QuantityLength centimeters =
-                new QuantityLength(1.0, LengthUnit.CENTIMETERS);
+        QuantityLength inches = new QuantityLength(1.0 / 2.54, LengthUnit.INCHES);
+        QuantityLength centimeters = new QuantityLength(1.0, LengthUnit.CENTIMETERS);
 
         assertEquals(inches, centimeters);
+    }
+
+    @Test
+    void givenOneCentimeterAndEquivalentInches_whenCompared_shouldReturnTrue() {
+        QuantityLength centimeters = new QuantityLength(1.0, LengthUnit.CENTIMETERS);
+        QuantityLength inches = new QuantityLength(1.0 / 2.54, LengthUnit.INCHES);
+
+        assertEquals(centimeters, inches);
     }
 
     // Tests that one centimeter is not equal to one foot.
