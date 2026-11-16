@@ -214,7 +214,7 @@ public class QuantityMeasurementApp {
     // Application entry point.
     public static void main(String[] args) {
 
-        System.out.println("Quantity Measurement App - UC5");
+        System.out.println("Quantity Measurement App");
         System.out.println("--------------------------------");
 
         System.out.println("\nUnit Conversion:");
