@@ -73,6 +73,42 @@ public class QuantityMeasurementEntity implements Serializable {
         this.message = message;
     }
 
+
+    public QuantityMeasurementEntity(
+            String id,
+            long timestamp,
+            double firstValue,
+            String firstMeasurementType,
+            String firstUnit,
+            Double secondValue,
+            String secondMeasurementType,
+            String secondUnit,
+            String operation,
+            double resultValue,
+            String resultMeasurementType,
+            String resultUnit,
+            boolean booleanResult,
+            boolean error,
+            String message) {
+
+        this.id = id;
+        this.timestamp = timestamp;
+        this.firstValue = firstValue;
+        this.firstMeasurementType = firstMeasurementType;
+        this.firstUnit = firstUnit;
+        this.secondValue = secondValue;
+        this.secondMeasurementType = secondMeasurementType;
+        this.secondUnit = secondUnit;
+        this.operation = operation;
+        this.resultValue = resultValue;
+        this.resultMeasurementType = resultMeasurementType;
+        this.resultUnit = resultUnit;
+        this.booleanResult = booleanResult;
+        this.error = error;
+        this.message = message;
+    }
+
+
     public String getId() {
         return id;
     }

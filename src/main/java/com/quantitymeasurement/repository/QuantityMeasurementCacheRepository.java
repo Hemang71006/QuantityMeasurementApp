@@ -128,4 +128,43 @@ public class QuantityMeasurementCacheRepository
             reset();
         }
     }
+
+
+    @Override
+    public List<QuantityMeasurementEntity> getByOperationType(String operation) {
+        return getAllMeasurements().stream()
+                .filter(entity -> entity.getOperation() != null
+                        && entity.getOperation().equalsIgnoreCase(operation))
+                .toList();
+    }
+
+    @Override
+    public List<QuantityMeasurementEntity> getByMeasurementType(String measurementType) {
+        return getAllMeasurements().stream()
+                .filter(entity -> entity.getFirstMeasurementType() != null
+                        && entity.getFirstMeasurementType()
+                        .equalsIgnoreCase(measurementType))
+                .toList();
+    }
+
+    @Override
+    public long count() {
+        return getAllMeasurements().size();
+    }
+
+
+    @Override
+    public synchronized void deleteAll() {
+        measurements.clear();
+
+        try (FileOutputStream outputStream =
+                     new FileOutputStream(storageFile, false)) {
+            outputStream.flush();
+        } catch (IOException exception) {
+            throw new IllegalStateException(
+                    "Failed to clear measurement history", exception);
+        }
+    }
+
+
 }

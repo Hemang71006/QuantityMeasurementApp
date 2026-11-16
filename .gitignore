@@ -28,3 +28,8 @@ Thumbs.db
 
 # Data files
 quantity-measurement-history.dat
+
+# H2 Database files
+*.mv.db
+*.trace.db
+*.lock.db

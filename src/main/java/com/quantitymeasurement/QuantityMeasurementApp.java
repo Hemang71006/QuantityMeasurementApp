@@ -10,27 +10,28 @@ import com.quantitymeasurement.model.QuantityLength;
 import com.quantitymeasurement.model.TemperatureUnit;
 import com.quantitymeasurement.model.VolumeUnit;
 import com.quantitymeasurement.model.WeightUnit;
-import com.quantitymeasurement.repository.QuantityMeasurementCacheRepository;
+import com.quantitymeasurement.repository.IQuantityMeasurementRepository;
+import com.quantitymeasurement.repository.QuantityMeasurementRepositoryFactory;
 import com.quantitymeasurement.service.QuantityMeasurementServiceImpl;
 
 /*
  * Project Name : Quantity Measurement App
- * Module : UC15 - N-Tier Architecture Refactoring
+ * Module : UC16 - Database Integration with JDBC
  * Author : Hemang
  * Date : 15-11-2026
  * Description : Application entry point and facade for quantity measurement operations.
  */
-
 public class QuantityMeasurementApp {
 
     private static final QuantityMeasurementApp INSTANCE =
             new QuantityMeasurementApp();
 
     private final QuantityMeasurementController controller;
+    private final IQuantityMeasurementRepository repository;
 
     private QuantityMeasurementApp() {
-        QuantityMeasurementCacheRepository repository =
-                QuantityMeasurementCacheRepository.getInstance();
+        repository =
+                QuantityMeasurementRepositoryFactory.createRepository();
 
         QuantityMeasurementServiceImpl service =
                 new QuantityMeasurementServiceImpl(repository);
@@ -43,8 +44,14 @@ public class QuantityMeasurementApp {
         return INSTANCE;
     }
 
+    // Returns the application controller.
     public QuantityMeasurementController getController() {
         return controller;
+    }
+
+    // Releases application resources.
+    public void shutdown() {
+        repository.releaseResources();
     }
 
     // Maintains compatibility with the UC1 Feet implementation.
@@ -306,8 +313,8 @@ public class QuantityMeasurementApp {
     // Demonstrates operations through the controller and service layers.
     private void demonstrateControllerOperations() {
 
-        System.out.println("\nUC15 - N-Tier Architecture Demonstration");
-        System.out.println("----------------------------------------");
+        System.out.println("\nUC16 - JDBC Database Integration Demonstration");
+        System.out.println("-----------------------------------------------");
 
         System.out.println("\nLength:");
 
@@ -398,108 +405,115 @@ public class QuantityMeasurementApp {
 
         QuantityMeasurementApp app = getInstance();
 
-        System.out.println("Quantity Measurement App - UC15");
+        System.out.println("Quantity Measurement App - UC16");
         System.out.println("--------------------------------");
 
-        app.demonstrateControllerOperations();
+        try {
+            app.demonstrateControllerOperations();
 
-        System.out.println("\nPrevious UC1-UC14 Compatibility Demonstrations:");
+            System.out.println(
+                    "\nPrevious UC1-UC14 Compatibility Demonstrations:"
+            );
 
-        Quantity<LengthUnit> oneFoot =
-                new Quantity<>(1.0, LengthUnit.FEET);
+            Quantity<LengthUnit> oneFoot =
+                    new Quantity<>(1.0, LengthUnit.FEET);
 
-        Quantity<LengthUnit> twelveInches =
-                new Quantity<>(12.0, LengthUnit.INCHES);
+            Quantity<LengthUnit> twelveInches =
+                    new Quantity<>(12.0, LengthUnit.INCHES);
 
-        demonstrateEquality(oneFoot, twelveInches);
+            demonstrateEquality(oneFoot, twelveInches);
 
-        demonstrateConversion(oneFoot, LengthUnit.INCHES);
+            demonstrateConversion(oneFoot, LengthUnit.INCHES);
 
-        demonstrateAddition(oneFoot, twelveInches);
+            demonstrateAddition(oneFoot, twelveInches);
 
-        demonstrateTargetUnitAddition(
-                oneFoot,
-                twelveInches,
-                LengthUnit.INCHES
-        );
+            demonstrateTargetUnitAddition(
+                    oneFoot,
+                    twelveInches,
+                    LengthUnit.INCHES
+            );
 
-        demonstrateSubtraction(
-                new Quantity<>(5.0, LengthUnit.FEET),
-                new Quantity<>(12.0, LengthUnit.INCHES)
-        );
+            demonstrateSubtraction(
+                    new Quantity<>(5.0, LengthUnit.FEET),
+                    new Quantity<>(12.0, LengthUnit.INCHES)
+            );
 
-        demonstrateTargetUnitSubtraction(
-                new Quantity<>(5.0, LengthUnit.FEET),
-                new Quantity<>(12.0, LengthUnit.INCHES),
-                LengthUnit.INCHES
-        );
+            demonstrateTargetUnitSubtraction(
+                    new Quantity<>(5.0, LengthUnit.FEET),
+                    new Quantity<>(12.0, LengthUnit.INCHES),
+                    LengthUnit.INCHES
+            );
 
-        demonstrateDivision(
-                new Quantity<>(10.0, LengthUnit.FEET),
-                new Quantity<>(2.0, LengthUnit.FEET)
-        );
+            demonstrateDivision(
+                    new Quantity<>(10.0, LengthUnit.FEET),
+                    new Quantity<>(2.0, LengthUnit.FEET)
+            );
 
-        Quantity<WeightUnit> oneKilogram =
-                new Quantity<>(1.0, WeightUnit.KILOGRAM);
+            Quantity<WeightUnit> oneKilogram =
+                    new Quantity<>(1.0, WeightUnit.KILOGRAM);
 
-        Quantity<WeightUnit> thousandGrams =
-                new Quantity<>(1000.0, WeightUnit.GRAM);
+            Quantity<WeightUnit> thousandGrams =
+                    new Quantity<>(1000.0, WeightUnit.GRAM);
 
-        demonstrateEquality(oneKilogram, thousandGrams);
-        demonstrateConversion(oneKilogram, WeightUnit.GRAM);
-        demonstrateAddition(oneKilogram, thousandGrams);
+            demonstrateEquality(oneKilogram, thousandGrams);
+            demonstrateConversion(oneKilogram, WeightUnit.GRAM);
+            demonstrateAddition(oneKilogram, thousandGrams);
 
-        demonstrateTargetUnitAddition(
-                oneKilogram,
-                thousandGrams,
-                WeightUnit.GRAM
-        );
+            demonstrateTargetUnitAddition(
+                    oneKilogram,
+                    thousandGrams,
+                    WeightUnit.GRAM
+            );
 
-        Quantity<VolumeUnit> oneLitre =
-                new Quantity<>(1.0, VolumeUnit.LITRE);
+            Quantity<VolumeUnit> oneLitre =
+                    new Quantity<>(1.0, VolumeUnit.LITRE);
 
-        demonstrateEquality(
-                oneLitre,
-                new Quantity<>(1000.0, VolumeUnit.MILLILITRE)
-        );
+            demonstrateEquality(
+                    oneLitre,
+                    new Quantity<>(1000.0, VolumeUnit.MILLILITRE)
+            );
 
-        demonstrateConversion(oneLitre, VolumeUnit.MILLILITRE);
+            demonstrateConversion(oneLitre, VolumeUnit.MILLILITRE);
 
-        demonstrateAddition(
-                oneLitre,
-                new Quantity<>(500.0, VolumeUnit.MILLILITRE)
-        );
+            demonstrateAddition(
+                    oneLitre,
+                    new Quantity<>(500.0, VolumeUnit.MILLILITRE)
+            );
 
-        Quantity<TemperatureUnit> zeroCelsius =
-                new Quantity<>(0.0, TemperatureUnit.CELSIUS);
+            Quantity<TemperatureUnit> zeroCelsius =
+                    new Quantity<>(0.0, TemperatureUnit.CELSIUS);
 
-        Quantity<TemperatureUnit> thirtyTwoFahrenheit =
-                new Quantity<>(32.0, TemperatureUnit.FAHRENHEIT);
+            Quantity<TemperatureUnit> thirtyTwoFahrenheit =
+                    new Quantity<>(32.0, TemperatureUnit.FAHRENHEIT);
 
-        demonstrateEquality(zeroCelsius, thirtyTwoFahrenheit);
+            demonstrateEquality(zeroCelsius, thirtyTwoFahrenheit);
 
-        demonstrateConversion(
-                zeroCelsius,
-                TemperatureUnit.KELVIN
-        );
+            demonstrateConversion(
+                    zeroCelsius,
+                    TemperatureUnit.KELVIN
+            );
 
-        demonstrateUnsupportedTemperatureOperations(
-                zeroCelsius,
-                new Quantity<>(100.0, TemperatureUnit.CELSIUS)
-        );
+            demonstrateUnsupportedTemperatureOperations(
+                    zeroCelsius,
+                    new Quantity<>(100.0, TemperatureUnit.CELSIUS)
+            );
 
-        System.out.println("\nWildcard Demonstration:");
+            System.out.println("\nWildcard Demonstration:");
 
-        displayMeasurement(oneFoot);
-        displayMeasurement(oneKilogram);
-        displayMeasurement(oneLitre);
-        displayMeasurement(zeroCelsius);
+            displayMeasurement(oneFoot);
+            displayMeasurement(oneKilogram);
+            displayMeasurement(oneLitre);
+            displayMeasurement(zeroCelsius);
 
-        System.out.println("\nDifferent Category Comparison:");
+            System.out.println("\nDifferent Category Comparison:");
 
-        System.out.println(
-                "1 KILOGRAM = 1 FOOT: "
-                        + oneKilogram.equals(oneFoot)
-        );
+            System.out.println(
+                    "1 KILOGRAM = 1 FOOT: "
+                            + oneKilogram.equals(oneFoot)
+            );
+
+        } finally {
+            app.shutdown();
+        }
     }
 }
