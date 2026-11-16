@@ -1,20 +1,43 @@
-package com.quantitymeasurement.model;
 
-/*
- * Project Name : Quantity Measurement App
- * Module : UC12 - Subtraction and Division
- * Author : Hemang
- * Date : 15-11-2026
- * Description : Represents an immutable generic quantity supporting conversion and arithmetic operations.
- */
+package com.quantitymeasurement.model;
 
 import com.quantitymeasurement.interfaces.IMeasurable;
 import java.util.Objects;
+import java.util.function.DoubleBinaryOperator;
+
+/*
+ * Project Name : Quantity Measurement App
+ * Module : UC13 - Centralized Arithmetic Logic
+ * Author : Hemang
+ * Date : 15-11-2026
+ * Description : Implements generic quantity operations using centralized arithmetic logic.
+ */
 
 public final class Quantity<U extends IMeasurable> {
 
     private final double value;
     private final U unit;
+
+    private enum ArithmeticOperation {
+        ADD((first, second) -> first + second),
+        SUBTRACT((first, second) -> first - second),
+        DIVIDE((first, second) -> {
+            if (second == 0.0) {
+                throw new ArithmeticException("Cannot divide by zero quantity");
+            }
+            return first / second;
+        });
+
+        private final DoubleBinaryOperator operator;
+
+        ArithmeticOperation(DoubleBinaryOperator operator) {
+            this.operator = operator;
+        }
+
+        private double compute(double first, double second) {
+            return operator.applyAsDouble(first, second);
+        }
+    }
 
     public Quantity(double value, U unit) {
         validateFinite(value);
@@ -42,6 +65,12 @@ public final class Quantity<U extends IMeasurable> {
     public Quantity<U> convertTo(U targetUnit) {
         validateTargetUnit(targetUnit);
 
+        if (unit.getClass() != targetUnit.getClass()) {
+            throw new IllegalArgumentException(
+                    "Target unit must belong to the same measurement category"
+            );
+        }
+
         double baseValue = convertToBaseUnit();
         double convertedValue = targetUnit.convertFromBaseUnit(baseValue);
 
@@ -51,105 +80,68 @@ public final class Quantity<U extends IMeasurable> {
     }
 
     public Quantity<U> add(Quantity<U> other) {
-        if (other == null) {
-            throw new IllegalArgumentException("Quantity to add cannot be null");
-        }
-
         return add(other, unit);
     }
 
     public Quantity<U> add(Quantity<U> other, U targetUnit) {
-        validateCompatible(other);
-        validateTargetUnit(targetUnit);
+        validateArithmeticOperands(other, targetUnit, true);
 
-        double firstBaseValue = convertToBaseUnit();
-        double secondBaseValue = other.convertToBaseUnit();
-        double sumInBaseUnit = firstBaseValue + secondBaseValue;
+        double resultInBaseUnit =
+                performBaseArithmetic(other, ArithmeticOperation.ADD);
 
-        validateFiniteResult(sumInBaseUnit);
-
-        double resultValue = targetUnit.convertFromBaseUnit(sumInBaseUnit);
-
-        validateFiniteResult(resultValue);
-
-        return new Quantity<>(resultValue, targetUnit);
+        return createResult(resultInBaseUnit, targetUnit);
     }
 
-    /**
-     * Subtracts another quantity from this quantity.
-     * The result is expressed in this quantity's unit.
-     *
-     * @param other quantity to subtract
-     * @return a new quantity containing the difference
-     * @throws IllegalArgumentException if other is null or belongs to another category
-     * @throws ArithmeticException if the calculation overflows
-     */
     public Quantity<U> subtract(Quantity<U> other) {
         return subtract(other, unit);
     }
 
-    /**
-     * Subtracts another quantity and expresses the result in the target unit.
-     * Both quantities are converted to their common base unit before subtraction.
-     *
-     * @param other quantity to subtract
-     * @param targetUnit unit in which the result should be expressed
-     * @return a new quantity containing the difference in the target unit
-     * @throws IllegalArgumentException if an argument is null or categories differ
-     * @throws ArithmeticException if the calculation overflows
-     */
     public Quantity<U> subtract(Quantity<U> other, U targetUnit) {
-        validateCompatible(other);
-        validateTargetUnit(targetUnit);
+        validateArithmeticOperands(other, targetUnit, true);
 
-        if (unit.getClass() != targetUnit.getClass()) {
-            throw new IllegalArgumentException(
-                    "Target unit must belong to the same measurement category"
-            );
-        }
+        double resultInBaseUnit =
+                performBaseArithmetic(other, ArithmeticOperation.SUBTRACT);
 
-        double firstBaseValue = convertToBaseUnit();
-        double secondBaseValue = other.convertToBaseUnit();
-
-        double differenceInBaseUnit = firstBaseValue - secondBaseValue;
-
-        validateFiniteResult(differenceInBaseUnit);
-
-        double resultValue =
-                targetUnit.convertFromBaseUnit(differenceInBaseUnit);
-
-        validateFiniteResult(resultValue);
-
-        return new Quantity<>(resultValue, targetUnit);
+        return createResult(resultInBaseUnit, targetUnit);
     }
 
     /**
      * Divides this quantity by another quantity of the same category.
-     * The result is a dimensionless ratio.
      *
      * @param other divisor quantity
-     * @return the ratio of this quantity to the other quantity
-     * @throws IllegalArgumentException if other is null or belongs to another category
-     * @throws ArithmeticException if the divisor is zero or the result overflows
+     * @return dimensionless ratio
      */
     public double divide(Quantity<U> other) {
-        validateCompatible(other);
+        validateArithmeticOperands(other, null, false);
+
+        return performBaseArithmetic(
+                other,
+                ArithmeticOperation.DIVIDE
+        );
+    }
+
+    private double performBaseArithmetic(
+            Quantity<U> other,
+            ArithmeticOperation operation) {
 
         double firstBaseValue = convertToBaseUnit();
         double secondBaseValue = other.convertToBaseUnit();
 
-        if (secondBaseValue == 0.0) {
-            throw new ArithmeticException("Cannot divide by zero quantity");
-        }
-
-        double result = firstBaseValue / secondBaseValue;
+        double result = operation.compute(
+                firstBaseValue,
+                secondBaseValue
+        );
 
         validateFiniteResult(result);
 
         return result;
     }
 
-    private void validateCompatible(Quantity<?> other) {
+    private void validateArithmeticOperands(
+            Quantity<U> other,
+            U targetUnit,
+            boolean targetUnitRequired) {
+
         if (other == null) {
             throw new IllegalArgumentException("Quantity cannot be null");
         }
@@ -159,6 +151,31 @@ public final class Quantity<U extends IMeasurable> {
                     "Operation requires quantities from the same measurement category"
             );
         }
+
+        validateFinite(value);
+        validateFinite(other.value);
+
+        if (targetUnitRequired) {
+            validateTargetUnit(targetUnit);
+
+            if (unit.getClass() != targetUnit.getClass()) {
+                throw new IllegalArgumentException(
+                        "Target unit must belong to the same measurement category"
+                );
+            }
+        }
+    }
+
+    private Quantity<U> createResult(
+            double resultInBaseUnit,
+            U targetUnit) {
+
+        double resultValue =
+                targetUnit.convertFromBaseUnit(resultInBaseUnit);
+
+        validateFiniteResult(resultValue);
+
+        return new Quantity<>(resultValue, targetUnit);
     }
 
     private static void validateTargetUnit(IMeasurable targetUnit) {
@@ -169,7 +186,9 @@ public final class Quantity<U extends IMeasurable> {
 
     private static void validateFinite(double value) {
         if (!Double.isFinite(value)) {
-            throw new IllegalArgumentException("Quantity value must be finite");
+            throw new IllegalArgumentException(
+                    "Quantity value must be finite"
+            );
         }
     }
 
