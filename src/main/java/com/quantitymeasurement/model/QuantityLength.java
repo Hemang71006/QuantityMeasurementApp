@@ -3,52 +3,49 @@ package com.quantitymeasurement.model;
 
 /*
  * Project Name : Quantity Measurement App
- * Module : UC8 - QuantityLength Refactoring
+ * Module : UC10 - Length Compatibility Wrapper
  * Author : Hemang
  * Date : 15-11-2026
- * Description : Represents immutable length measurements with comparison, conversion, and addition operations.
+ * Description : Preserves legacy length operations using the generic Quantity class.
  */
 
 public final class QuantityLength {
 
-    private final double value;
-    private final LengthUnit unit;
+    private static final double EPSILON = 1e-9;
+
+    private final Quantity<LengthUnit> quantity;
 
     // Creates a length measurement.
     public QuantityLength(double value, LengthUnit unit) {
+        quantity = new Quantity<>(value, unit);
+    }
 
-        if (!Double.isFinite(value)) {
-            throw new IllegalArgumentException(
-                    "Measurement must be a finite number"
-            );
+    // Creates a wrapper around an existing generic quantity.
+    private QuantityLength(Quantity<LengthUnit> quantity) {
+
+        if (quantity == null) {
+            throw new IllegalArgumentException("Quantity cannot be null");
         }
 
-        if (unit == null) {
-            throw new IllegalArgumentException(
-                    "Length unit cannot be null"
-            );
-        }
-
-        this.value = value;
-        this.unit = unit;
+        this.quantity = quantity;
     }
 
     // Returns the measurement value.
     public double getValue() {
-        return value;
+        return quantity.getValue();
     }
 
     // Returns the measurement unit.
     public LengthUnit getUnit() {
-        return unit;
+        return quantity.getUnit();
     }
 
-    // Delegates conversion to the unit enum.
+    // Converts this measurement into the base unit.
     public double convertToBaseUnit() {
-        return unit.convertToBaseUnit(value);
+        return quantity.convertToBaseUnit();
     }
 
-    // Converts a value from one length unit to another.
+    // Converts a value from one length unit to another without rounding.
     public static double convert(
             double value,
             LengthUnit sourceUnit,
@@ -62,16 +59,15 @@ public final class QuantityLength {
 
         if (sourceUnit == null || targetUnit == null) {
             throw new IllegalArgumentException(
-                    "Units cannot be null"
+                    "Source and target units cannot be null"
             );
         }
 
         double baseValue = sourceUnit.convertToBaseUnit(value);
-
         return targetUnit.convertFromBaseUnit(baseValue);
     }
 
-    // Converts this measurement into the requested unit.
+    // Converts this measurement into the requested unit without rounding.
     public QuantityLength convertTo(LengthUnit targetUnit) {
 
         if (targetUnit == null) {
@@ -80,13 +76,16 @@ public final class QuantityLength {
             );
         }
 
-        double convertedValue =
-                targetUnit.convertFromBaseUnit(convertToBaseUnit());
+        double convertedValue = convert(
+                getValue(),
+                getUnit(),
+                targetUnit
+        );
 
         return new QuantityLength(convertedValue, targetUnit);
     }
 
-    // Adds another measurement to this measurement.
+    // Adds another measurement and returns the result in this unit.
     public QuantityLength add(QuantityLength other) {
 
         if (other == null) {
@@ -95,7 +94,7 @@ public final class QuantityLength {
             );
         }
 
-        return add(this, other);
+        return new QuantityLength(quantity.add(other.quantity));
     }
 
     // Adds two measurements and returns the result in the first unit.
@@ -103,21 +102,14 @@ public final class QuantityLength {
             QuantityLength first,
             QuantityLength second) {
 
-        if (first == null || second == null) {
-            throw new IllegalArgumentException(
-                    "Length measurements cannot be null"
-            );
-        }
+        validateMeasurements(first, second);
 
-        double firstInFeet = first.convertToBaseUnit();
-        double secondInFeet = second.convertToBaseUnit();
-
-        double sumInFeet = firstInFeet + secondInFeet;
-
-        return createFromBaseUnit(sumInFeet, first.unit);
+        return new QuantityLength(
+                first.quantity.add(second.quantity)
+        );
     }
 
-    // Adds raw measurement values and returns the result in the first unit.
+    // Adds raw values and returns the result in the first unit.
     public static QuantityLength add(
             double firstValue,
             LengthUnit firstUnit,
@@ -133,17 +125,13 @@ public final class QuantityLength {
         return add(first, second);
     }
 
-    // Adds two measurements and returns the result in the specified target unit.
+    // Adds two measurements and returns the result in the target unit.
     public static QuantityLength add(
             QuantityLength first,
             QuantityLength second,
             LengthUnit targetUnit) {
 
-        if (first == null || second == null) {
-            throw new IllegalArgumentException(
-                    "Length measurements cannot be null"
-            );
-        }
+        validateMeasurements(first, second);
 
         if (targetUnit == null) {
             throw new IllegalArgumentException(
@@ -151,12 +139,9 @@ public final class QuantityLength {
             );
         }
 
-        double firstInFeet = first.convertToBaseUnit();
-        double secondInFeet = second.convertToBaseUnit();
-
-        double sumInFeet = firstInFeet + secondInFeet;
-
-        return createFromBaseUnit(sumInFeet, targetUnit);
+        return new QuantityLength(
+                first.quantity.add(second.quantity, targetUnit)
+        );
     }
 
     // Adds raw values and returns the result in the specified target unit.
@@ -176,32 +161,22 @@ public final class QuantityLength {
         return add(first, second, targetUnit);
     }
 
-    // Creates a new measurement by converting a base unit value into the target unit.
-    private static QuantityLength createFromBaseUnit(
-            double baseValue,
-            LengthUnit targetUnit) {
+    // Validates both operands before addition.
+    private static void validateMeasurements(
+            QuantityLength first,
+            QuantityLength second) {
 
-        if (!Double.isFinite(baseValue)) {
-            throw new ArithmeticException(
-                    "Addition result exceeds the finite double range"
-            );
-        }
-
-        if (targetUnit == null) {
+        if (first == null || second == null) {
             throw new IllegalArgumentException(
-                    "Target unit cannot be null"
+                    "Length measurements cannot be null"
             );
         }
-
-        double convertedValue =
-                targetUnit.convertFromBaseUnit(baseValue);
-
-        return new QuantityLength(convertedValue, targetUnit);
     }
 
-    // Compares two measurements after converting them to feet.
+    // Compares length measurements using the legacy tolerance.
     @Override
     public boolean equals(Object obj) {
+
         if (this == obj) {
             return true;
         }
@@ -212,21 +187,20 @@ public final class QuantityLength {
 
         QuantityLength other = (QuantityLength) obj;
 
-        double firstValue = convertToBaseUnit();
-        double secondValue = other.convertToBaseUnit();
-
-        return Math.abs(firstValue - secondValue) < 1e-9;
+        return Math.abs(
+                convertToBaseUnit() - other.convertToBaseUnit()
+        ) < EPSILON;
     }
 
-    // Generates a hash code using the base unit value.
+    // Uses a constant hash code to preserve the equals contract with tolerance.
     @Override
     public int hashCode() {
-        return Double.hashCode(convertToBaseUnit());
+        return 1;
     }
 
     // Returns a readable representation of the measurement.
     @Override
     public String toString() {
-        return value + " " + unit;
+        return getValue() + " " + getUnit();
     }
 }
