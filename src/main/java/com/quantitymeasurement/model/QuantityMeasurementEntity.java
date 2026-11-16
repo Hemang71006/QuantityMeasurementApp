@@ -1,40 +1,82 @@
+
 package com.quantitymeasurement.model;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import jakarta.persistence.PrePersist;
 
 import java.io.Serializable;
 import java.util.UUID;
 
 /*
- * Project Name : Quantity Measurement App
- * Module : UC15 - N-Tier Architecture Refactoring
- * Author : Hemang
- * Date : 15-11-2026
- * Description : Serializable entity used to persist quantity measurement operations and results.
+ * JPA entity for storing quantity measurement operations and results.
+ * Author: Hemang
+ * Date: 15-11-2026
  */
-
+@Entity
+@Table(
+        name = "quantity_measurements",
+        indexes = {
+                @Index(name = "idx_measurement_operation", columnList = "operation"),
+                @Index(name = "idx_measurement_type", columnList = "first_measurement_type"),
+                @Index(name = "idx_measurement_timestamp", columnList = "timestamp")
+        }
+)
 public class QuantityMeasurementEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final String id;
-    private final long timestamp;
+    @Id
+    @Column(nullable = false, updatable = false)
+    private String id;
 
-    private final double firstValue;
-    private final String firstMeasurementType;
-    private final String firstUnit;
+    @Column(nullable = false)
+    private long timestamp;
 
-    private final Double secondValue;
-    private final String secondMeasurementType;
-    private final String secondUnit;
+    @Column(name = "first_value", nullable = false)
+    private double firstValue;
 
-    private final String operation;
+    @Column(name = "first_measurement_type")
+    private String firstMeasurementType;
 
-    private final double resultValue;
-    private final String resultMeasurementType;
-    private final String resultUnit;
+    @Column(name = "first_unit")
+    private String firstUnit;
 
-    private final boolean booleanResult;
-    private final boolean error;
-    private final String message;
+    @Column(name = "second_value")
+    private Double secondValue;
+
+    @Column(name = "second_measurement_type")
+    private String secondMeasurementType;
+
+    @Column(name = "second_unit")
+    private String secondUnit;
+
+    @Column(nullable = false)
+    private String operation;
+
+    @Column(name = "result_value")
+    private double resultValue;
+
+    @Column(name = "result_measurement_type")
+    private String resultMeasurementType;
+
+    @Column(name = "result_unit")
+    private String resultUnit;
+
+    @Column(name = "boolean_result")
+    private boolean booleanResult;
+
+    @Column(name = "is_error")
+    private boolean error;
+
+    @Column(length = 2000)
+    private String message;
+
+    public QuantityMeasurementEntity() {
+    }
 
     public QuantityMeasurementEntity(
             double firstValue,
@@ -53,26 +95,20 @@ public class QuantityMeasurementEntity implements Serializable {
 
         this.id = UUID.randomUUID().toString();
         this.timestamp = System.currentTimeMillis();
-
         this.firstValue = firstValue;
         this.firstMeasurementType = firstMeasurementType;
         this.firstUnit = firstUnit;
-
         this.secondValue = secondValue;
         this.secondMeasurementType = secondMeasurementType;
         this.secondUnit = secondUnit;
-
         this.operation = operation;
-
         this.resultValue = resultValue;
         this.resultMeasurementType = resultMeasurementType;
         this.resultUnit = resultUnit;
-
         this.booleanResult = booleanResult;
         this.error = error;
         this.message = message;
     }
-
 
     public QuantityMeasurementEntity(
             String id,
@@ -108,6 +144,16 @@ public class QuantityMeasurementEntity implements Serializable {
         this.message = message;
     }
 
+    @PrePersist
+    public void initializeDefaults() {
+        if (id == null) {
+            id = UUID.randomUUID().toString();
+        }
+
+        if (timestamp == 0) {
+            timestamp = System.currentTimeMillis();
+        }
+    }
 
     public String getId() {
         return id;

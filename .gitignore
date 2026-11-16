@@ -29,7 +29,11 @@ Thumbs.db
 # Data files
 quantity-measurement-history.dat
 
-# H2 Database files
+# H2 Database
 *.mv.db
 *.trace.db
 *.lock.db
+
+# UC16 backup and dump
+pom.xml.bak
+dump/
